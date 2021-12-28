@@ -9,7 +9,7 @@ class Input(object):
         self.paddle0 = 0x00
         self.quit = 0x0
 
-        # Custom key inputs. 
+        # Custom key inputs.
         self._save_state = 0
         self._restore_state = 0
 
@@ -24,11 +24,11 @@ class Input(object):
 
     def set_save_state(self, state):
         """ TODO: Get current key state, to avoid need to 'toggle' """
-        self.swcha   = state['swcha']   
-        self.swchb   = state['swchb']   
-        self.input7  = state['input7']  
-        self.paddle0 = state['paddle0'] 
-        self.quit    = state['quit']    
+        self.swcha   = state['swcha']
+        self.swchb   = state['swchb']
+        self.input7  = state['input7']
+        self.paddle0 = state['paddle0']
+        self.quit    = state['quit']
 
     def refresh_inputs(self):
         pass

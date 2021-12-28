@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """ Entry point for the atari emulator.
     Intended to work with python3, python2, pypy, pygame, pyglet (although no input, so can't play).
 """
@@ -35,8 +36,8 @@ def config(graphics_selection, audio_selection, cpu_selection):
     exec(graphics_options[graphics_selection], {}, exec_locals)
     exec(cpu_options[cpu_selection], {}, exec_locals)
 
-    return (exec_locals['Graphics'], 
-            exec_locals['AudioDriver'], 
+    return (exec_locals['Graphics'],
+            exec_locals['AudioDriver'],
             exec_locals['cpu'])
 
 def run(args):
@@ -56,21 +57,21 @@ def main():
                               help="Json file to save/restore state. Triggered via '[',']' keys")
     parser.add_argument('-s', dest='stop_clock',     type=int, default=0,
                               help="Set a clock time to stop (useful for profiling), setting to '0' is disable stop")
-    parser.add_argument('-c', dest='cart_type', 
+    parser.add_argument('-c', dest='cart_type',
                               choices=['default', 'pb', 'mnet', 'cbs',
-                              'e', 'fe','super','f4', 'single_bank'], 
+                              'e', 'fe','super','f4', 'single_bank'],
                               default='default',
                               help="Select the cartridge type of the rom being run (default is for 'common' bankswitching)")
-    parser.add_argument('-g', dest='graphics_driver', 
-                              choices=graphics_options.keys(), 
+    parser.add_argument('-g', dest='graphics_driver',
+                              choices=graphics_options.keys(),
                               default='pygame',
                               help="Select an alternate to graphics module")
-    parser.add_argument('--cpu', dest='cpu_driver', 
-                              choices=cpu_options.keys(), 
+    parser.add_argument('--cpu', dest='cpu_driver',
+                              choices=cpu_options.keys(),
                               default='cpu_gen',
                               help="Select an alternate CPU emulation, primarily to allow trying different optimisations.")
-    parser.add_argument('-a', dest='audio_driver', 
-                              choices=audio_options.keys(), 
+    parser.add_argument('-a', dest='audio_driver',
+                              choices=audio_options.keys(),
                               default='tia_dummy',
                               help="Select an alternate CPU emulation, primarily to allow trying different optimisations.")
     parser.add_argument('-n', dest='no_delay',       action='store_true',
@@ -79,7 +80,7 @@ def main():
     args = parser.parse_args()
 
     print(args)
-                      
+
     run(args)
 
 if __name__=='__main__':
