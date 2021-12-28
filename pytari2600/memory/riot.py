@@ -42,37 +42,37 @@ class Riot(object):
 
     def read(self, addr):
         value = 0
-    
+
         future_clock = self.clock.system_clock + 12
-    
+
         if 0 == (addr & self.NOT_RAMSELECT):
             return self.ram[addr & self.RIOT_ADDRMASK]
-    
+
         # Ignore interrupt enable address line.
         test = addr & self.RIOT_ADDRMASK & ~self.INT_ENABLE_MASK
         if test == self.RIOT_Swcha:
             value = self.inputs.swcha
-    
+
         elif test == self.RIOT_Swchb:
             value = self.inputs.swchb
-    
+
         elif test == self.RIOT_Tim1t or test == self.RIOT_Tim8t or test == self.RIOT_Tim64t or test == self.RIOT_T1024t or test == self.TIMERADDR:
 
             if self.expiration_time >= future_clock:
-                # If expiration hasn't occured, return the time remaining. 
+                # If expiration hasn't occured, return the time remaining.
                 value = (self.expiration_time - future_clock) / (self.interval * self.CYCLES_TO_CLOCK)
             else: # Calculate ticks past zero, may not be quite right
-                # The interval was passed, value counts down from 255. 
+                # The interval was passed, value counts down from 255.
                 value = 0x100 - (((future_clock - self.expiration_time)/self.CYCLES_TO_CLOCK) & 0xFF)
         elif test == self.RIOT_Interrupt:
             if self.expiration_time >= future_clock:
                 value = 0
             else:
-                # Return the interrupt flag if time has expired. 
+                # Return the interrupt flag if time has expired.
                 value = 0x80
         else:
             print("Bad address:", addr)
-    
+
         return value
 
     def write(self, addr, data):

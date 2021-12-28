@@ -34,7 +34,7 @@ class PlayfieldState(object):
         self.update()
 
     def _pre_calc_playfield(self):
-        """ Pre-calc playfield lists. 
+        """ Pre-calc playfield lists.
 
             Bit order for displaying pf1 is reverse to pf0 & pf2.
             Order:
@@ -79,19 +79,19 @@ class PlayfieldState(object):
 
         self._pf_lookup.extend(field)
 
-    def update_pf0(self, data):   
+    def update_pf0(self, data):
         self.pf0 = data
         self.update()
 
-    def update_pf1(self, data):   
+    def update_pf1(self, data):
         self.pf1 = data
         self.update()
 
-    def update_pf2(self, data):   
+    def update_pf2(self, data):
         self.pf2 = data
         self.update()
 
-    def update_ctrlpf(self, data):   
+    def update_ctrlpf(self, data):
         self.ctrlpf = data
         self.update()
 
@@ -137,7 +137,7 @@ class BallState(object):
 
         width = 1 << ((self.ctrlpf & 0x30) >> 4)
 
-        self._x_min = self.resbl - Stella.HORIZONTAL_BLANK 
+        self._x_min = self.resbl - Stella.HORIZONTAL_BLANK
         self._x_max = self.resbl - Stella.HORIZONTAL_BLANK  + width
 
         self._calc_ball_scan()
@@ -145,7 +145,7 @@ class BallState(object):
     def update_resbl(self, data):
         self.resbl = data
         self.update()
-        
+
     def update_enableOld(self, data):
         self.enableOld = data
         self.update()
@@ -228,7 +228,7 @@ class MissileState(object):
 
     def _calc_missile_scan(self):
         """ Pre-calculate an entire scan line, as update is called relatively
-            infrequently. 
+            infrequently.
         """
         self._scan_line = [False] * Stella.FRAME_WIDTH
 
@@ -238,7 +238,7 @@ class MissileState(object):
                 width = 1 << ((self.nusiz & 0x30) >> 4)
                 # Uses similar position to 'player'
                 for i in range(width):
-                    x = (i +self.resm + n*self._gap*8 - Stella.HORIZONTAL_BLANK) % Stella.FRAME_WIDTH 
+                    x = (i +self.resm + n*self._gap*8 - Stella.HORIZONTAL_BLANK) % Stella.FRAME_WIDTH
                     self._scan_line[x] = True
 
     def get_missile_scan(self):
@@ -277,12 +277,12 @@ class PlayerState(object):
         return state
 
     def set_save_state(self, state):
-        self.nusiz = state['nusiz'] 
-        self.p     = state['p']     
-        self.pOld  = state['pOld']  
-        self.refp  = state['refp']  
-        self.resp  = state['resp']  
-        self.vdelp = state['vdelp'] 
+        self.nusiz = state['nusiz']
+        self.p     = state['p']
+        self.pOld  = state['pOld']
+        self.refp  = state['refp']
+        self.resp  = state['resp']
+        self.vdelp = state['vdelp']
 
         self.update()
 
@@ -386,8 +386,8 @@ class PlayerState(object):
         rotation = Stella.FRAME_WIDTH-self._pos_start
         scan = self._player_scan_unshifted[self._number][self._size][self._gap][self._reflect][self._grp]
         self._scan_line = scan[rotation:] + scan[:rotation]
-                            
-        
+
+
     def get_player_scan(self):
         return self._scan_line
 
@@ -504,7 +504,7 @@ class Colors(object):
           self.colors.append(self.set_color(r, g, b))
 
     def fade_color(self, color):
-        color  = (int(color[0] * 0.9), 
+        color  = (int(color[0] * 0.9),
                   int(color[1] * 0.9),
                   int(color[2] * 0.9),
                   int(color[3] * 0.9))
@@ -526,7 +526,7 @@ class Stella(object):
     PIXEL_WIDTH       = 4
 
     # Scaled 'blit' size.
-    BLIT_WIDTH  = FRAME_WIDTH  * PIXEL_WIDTH 
+    BLIT_WIDTH  = FRAME_WIDTH  * PIXEL_WIDTH
     BLIT_HEIGHT = FRAME_HEIGHT * PIXEL_HEIGHT
 
     VSYNC_LINES       = 3
@@ -580,7 +580,7 @@ class Stella(object):
 
         self._collision_state = CollisionState()
         # Dummy input return values
-        self._inpt = [0, 0, 0, 0, 0, 0] 
+        self._inpt = [0, 0, 0, 0, 0, 0]
 
         self._debug_display_time = 0
         self._vsync_debug_output_clock = 0
@@ -850,10 +850,10 @@ class Stella(object):
             self._hmove()
 
     def _STELLA_Write_Hclr(self, data):
-            self.nextLine.hmp[0] = 0 
-            self.nextLine.hmp[1] = 0 
-            self.nextLine.hmm[0] = 0 
-            self.nextLine.hmm[1] = 0 
+            self.nextLine.hmp[0] = 0
+            self.nextLine.hmp[1] = 0
+            self.nextLine.hmm[0] = 0
+            self.nextLine.hmm[1] = 0
             self.nextLine.hmbl   = 0
 
     def _STELLA_Write_Vdelp0(self, data):
@@ -871,10 +871,10 @@ class Stella(object):
     def _screen_scan(self, next_line, display_lines):
 
       FUTURE_PIXELS = 1
-    
+
       last_screen_pos = self._last_screen_update_clock - self._screen_start_clock
       screen_pos      = self.clocks.system_clock       - self._screen_start_clock + FUTURE_PIXELS
-    
+
       y_start = int(last_screen_pos/Stella.HORIZONTAL_TICKS) - self.START_DRAW_Y
       y_stop  = int(screen_pos/Stella.HORIZONTAL_TICKS) - self.START_DRAW_Y
 
@@ -902,15 +902,15 @@ class Stella(object):
           last_x_stop = screen_pos % Stella.HORIZONTAL_TICKS - Stella.HORIZONTAL_BLANK
 
         for y in range(y_start, y_stop+1):
-    
+
           if y == y_stop:
             x_stop = last_x_stop
           else:
             x_stop = self.FRAME_WIDTH - 1
-    
+
           current_y_line = display_lines[y]
           for x in range(x_start, x_stop):
-    
+
             pf = pf_scan[x]
             bl = bl_scan[x]
             m1 = m1_scan[x]
@@ -926,23 +926,23 @@ class Stella(object):
             pixelColor = nl_bgColor
             hits = 0
             if priority_ctrl:
-              if pf or bl: 
+              if pf or bl:
                   pixelColor = nl_pfColor
                   hits += bl + pf
-              if p1 or m1: 
+              if p1 or m1:
                   pixelColor = nl_pColor1
                   hits += m1 + p1
-              if p0 or m0: 
+              if p0 or m0:
                   pixelColor = nl_pColor0
                   hits += m0 + p0
             else:
-              if p1 or m1: 
+              if p1 or m1:
                   pixelColor = nl_pColor1
                   hits += m1 + p1
-              if p0 or m0: 
+              if p0 or m0:
                   pixelColor = nl_pColor0
                   hits += m0 + p0
-              if pf or bl: 
+              if pf or bl:
                   pixelColor = nl_pfColor
                   hits += bl + pf
 
@@ -960,7 +960,7 @@ class Stella(object):
             current_y_line[x] = pixelColor
 
           x_start = 0
-    
+
       self._last_screen_update_clock = self.clocks.system_clock + FUTURE_PIXELS
 
     @staticmethod
@@ -1026,7 +1026,7 @@ class Stella(object):
         else:
             if self.VSYNC_OFF == (data & self.VSYNC_MASK):
                 self._is_vsync = False
-                self._vsync_debug_output_clock = self.clocks.system_clock 
+                self._vsync_debug_output_clock = self.clocks.system_clock
                 self._screen_start_clock = self.clocks.system_clock - Stella.HORIZONTAL_TICKS + (Stella.HORIZONTAL_TICKS - self.clocks.system_clock + self._screen_start_clock) % Stella.HORIZONTAL_TICKS
                 self._last_screen_update_clock = self._screen_start_clock
 
@@ -1051,6 +1051,6 @@ class Stella(object):
     def _write_rsync(self, data):
         FUDGE = 3
         if (self.clocks.system_clock - self._screen_start_clock) > 3:
-          self.clocks.system_clock += Stella.HORIZONTAL_TICKS - (self.clocks.system_clock - self._screen_start_clock + FUDGE) % Stella.HORIZONTAL_TICKS 
+          self.clocks.system_clock += Stella.HORIZONTAL_TICKS - (self.clocks.system_clock - self._screen_start_clock + FUDGE) % Stella.HORIZONTAL_TICKS
 
 

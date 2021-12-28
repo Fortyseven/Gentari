@@ -332,7 +332,7 @@ class InstructionExec(object):
             self.pc_state.P.set_Z((0,1)[rs == 0])   # Zero
             self.pc_state.P.set_V((0,1)[r != rs])   # Overflow
 
-            r = a - b - c 
+            r = a - b - c
             self.pc_state.P.set_C((1,0)[0x100 == (r & 0x100)]) # Carry (not borrow
             result = a - b - c
         elif 1 == self.pc_state.P.get_D():
@@ -389,7 +389,7 @@ class ReadWriteInstruction(Instruction):
         self.address          = address.clone()
         self.read             = read
         self.write            = write
-        self.additional_delay = additional_delay 
+        self.additional_delay = additional_delay
 
         self._read_time    = self.read.get_reading_time() + self.additional_delay
         self._pc_increment = self.address.get_addressing_size() + 1
@@ -416,7 +416,7 @@ class ReadWriteInstruction(Instruction):
 #        print "%X %s %s %d"%(self.pc_state.PC, self.instruction_exec.__name__, str(self.pc_state), self.clocks.system_clock)
         self.clocks.system_clock += w.get_writing_time()
         w.write(addr, data)
-        self.pc_state.PC += self._pc_increment 
+        self.pc_state.PC += self._pc_increment
 
     def execute_null_read(self):
         a = self.address
@@ -426,7 +426,7 @@ class ReadWriteInstruction(Instruction):
         data = self.instruction_exec(0) & 0xFF
         self.clocks.system_clock += w.get_writing_time()
         w.write(addr, data)
-        self.pc_state.PC += self._pc_increment 
+        self.pc_state.PC += self._pc_increment
 
     def execute_null_write(self):
         a = self.address
@@ -434,7 +434,7 @@ class ReadWriteInstruction(Instruction):
         value        = self.read.read(addr)
         self.clocks.system_clock += a.get_addressing_time() + self._read_time
         data = self.instruction_exec(value) & 0xFF
-        self.pc_state.PC += self._pc_increment 
+        self.pc_state.PC += self._pc_increment
 
 class BreakInstruction(Instruction):
     """BreakInstruction"""
@@ -510,7 +510,7 @@ class JumpSubRoutineInstruction(Instruction):
 
 class ReturnFromSubRoutineInstruction(Instruction):
     """ReturnFromSubRoutineInstruction"""
-    
+
     def __init__(self, clocks, pc_state, memory, instruction_exec):
         super(ReturnFromSubRoutineInstruction, self).__init__(clocks, pc_state, instruction_exec)
         self.memory = memory
@@ -519,7 +519,7 @@ class ReturnFromSubRoutineInstruction(Instruction):
         return self.__class__(self.clocks, self.pc_state, self.memory, self.instruction_exec)
 
     def execute(self):
-        # T1 - PC + 1 
+        # T1 - PC + 1
         self.clocks.system_clock += self.pc_state.CYCLES_TO_CLOCK
         self.pc_state.PC += 1
         # T2 - Stack Ptr
@@ -642,10 +642,10 @@ class PHPInstruction(Instruction):
         return self.__class__(self.clocks, self.pc_state, self.memory, self.instruction_exec)
 
     def execute(self):
-        # T1 - PC + 1 
+        # T1 - PC + 1
         self.clocks.system_clock += self.pc_state.CYCLES_TO_CLOCK
         self.pc_state.PC += 1
-        # T2 - PC + 1 
+        # T2 - PC + 1
         self.clocks.system_clock += self.pc_state.CYCLES_TO_CLOCK
         self.pc_state.P.set_B(1)
         self.pc_state.P.set_X1(1)
@@ -664,7 +664,7 @@ class PLPInstruction(Instruction):
         return self.__class__(self.clocks, self.pc_state, self.memory, self.instruction_exec)
 
     def execute(self):
-        # T1 - PC + 1 
+        # T1 - PC + 1
         self.clocks.system_clock += self.pc_state.CYCLES_TO_CLOCK
         self.pc_state.PC += 1
         # T2 Stack Ptr. (Discard data)
@@ -687,10 +687,10 @@ class PHAInstruction(Instruction):
         return self.__class__(self.clocks, self.pc_state, self.memory, self.instruction_exec)
 
     def execute(self):
-        # T1 - PC + 1 
+        # T1 - PC + 1
         self.clocks.system_clock += self.pc_state.CYCLES_TO_CLOCK
         self.pc_state.PC += 1
-        # T2 - PC + 1 
+        # T2 - PC + 1
         self.clocks.system_clock += self.pc_state.CYCLES_TO_CLOCK
         self.memory.writeSp(self.pc_state.S.get_value(), self.pc_state.A.get_value())
         self.pc_state.S -= 1
@@ -707,7 +707,7 @@ class PLAInstruction(Instruction):
         return self.__class__(self.clocks, self.pc_state, self.memory, self.instruction_exec)
 
     def execute(self):
-        # T1 - PC + 1 
+        # T1 - PC + 1
         self.clocks.system_clock += self.pc_state.CYCLES_TO_CLOCK
         self.pc_state.PC += 1
         # T2 Stack Ptr. (Discard data)

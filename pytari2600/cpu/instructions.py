@@ -1,5 +1,6 @@
 import ctypes
 
+
 class Reading(object):
     def __init__(self, pc_state, memory):
         self.pc_state = pc_state
@@ -11,6 +12,7 @@ class Reading(object):
     def read(self, address):
         return self.memory.read(address)
 
+
 class NullReading(Reading):
     def __init__(self, pc_state, memory):
         super(NullReading, self).__init__(pc_state, memory)
@@ -21,6 +23,7 @@ class NullReading(Reading):
     def get_reading_time(self):
         return self.pc_state.CYCLES_TO_CLOCK
 
+
 class AccumulatorReading(Reading):
     def __init__(self, pc_state, memory):
         super(AccumulatorReading, self).__init__(pc_state, memory)
@@ -30,6 +33,7 @@ class AccumulatorReading(Reading):
 
     def get_reading_time(self):
         return self.pc_state.CYCLES_TO_CLOCK
+
 
 class Writing(object):
     def __init__(self, pc_state, memory):
@@ -42,12 +46,14 @@ class Writing(object):
     def get_writing_time(self):
         return 2*self.pc_state.CYCLES_TO_CLOCK
 
+
 class RegWriting(Writing):
     def __init__(self, pc_state, memory):
         super(RegWriting, self).__init__(pc_state, memory)
 
     def get_writing_time(self):
         return self.pc_state.CYCLES_TO_CLOCK
+
 
 class NullWriting(Writing):
     def __init__(self, pc_state, memory):
@@ -59,6 +65,7 @@ class NullWriting(Writing):
     def get_writing_time(self):
         return 0
 
+
 class AccumulatorWriting(Writing):
     def __init__(self, pc_state, memory):
         super(AccumulatorWriting, self).__init__(pc_state, memory)
@@ -68,6 +75,7 @@ class AccumulatorWriting(Writing):
 
     def get_writing_time(self):
         return self.pc_state.CYCLES_TO_CLOCK
+
 
 class InstructionExec(object):
     def __init__(self, pc_state):
@@ -133,9 +141,10 @@ class InstructionExec(object):
 
     def BIT_exec(self, data):
         """BIT"""
-        self.pc_state.P.set_N((0,1)[0x80 == (int(data) & 0x80)])
-        self.pc_state.P.set_V((0,1)[0x40 == (int(data) & 0x40)])
-        self.pc_state.P.set_Z((0,1)[(self.pc_state.A.get_value() & int(data)) == 0x0])
+        self.pc_state.P.set_N((0, 1)[0x80 == (int(data) & 0x80)])
+        self.pc_state.P.set_V((0, 1)[0x40 == (int(data) & 0x40)])
+        self.pc_state.P.set_Z(
+            (0, 1)[(self.pc_state.A.get_value() & int(data)) == 0x0])
         return 0
 
     def ROL_exec(self, data):
@@ -200,12 +209,14 @@ class InstructionExec(object):
 
     def ADC_exec(self, data):
         """ADC"""
-        self.pc_state.A.set_value(self.addc(self.pc_state.A.get_value(), int(data), self.pc_state.P.get_C()))
+        self.pc_state.A.set_value(
+            self.addc(self.pc_state.A.get_value(), int(data), self.pc_state.P.get_C()))
         return 0
 
     def SBC_exec(self, data):
         """SBC"""
-        self.pc_state.A.set_value(self.subc(self.pc_state.A.get_value(), int(data), 1 - self.pc_state.P.get_C()))
+        self.pc_state.A.set_value(
+            self.subc(self.pc_state.A.get_value(), int(data), 1 - self.pc_state.P.get_C()))
         return 0
 
     def INC_exec(self, data):
@@ -280,86 +291,95 @@ class InstructionExec(object):
     def ASR_exec(self, data):
         """ASR"""
         # Undocumented op code
-        self.pc_state.A.set_value(((self.pc_state.A.get_value() & int(data)) >> 1) & 0x7F)
+        self.pc_state.A.set_value(
+            ((self.pc_state.A.get_value() & int(data)) >> 1) & 0x7F)
         self.set_status_NZ(self.pc_state.A.get_value())
         return 0
 
     def SBX_exec(self, data):
         """STB"""
         # Undocumented op code
-        self.pc_state.X.set_value(self.pc_state.A.get_value() & self.pc_state.X.get_value())
-        self.pc_state.X.set_value(self.subc(self.pc_state.X.get_value(), int(data), 0))
+        self.pc_state.X.set_value(
+            self.pc_state.A.get_value() & self.pc_state.X.get_value())
+        self.pc_state.X.set_value(
+            self.subc(self.pc_state.X.get_value(), int(data), 0))
         return 0
 
-
     def set_status_NZ(self, value):
-        self.pc_state.P.set_N((0,1)[0x80 == (value & 0x80)])
-        self.pc_state.P.set_Z((0,1)[0x00 == (value & 0xFF)])
+        self.pc_state.P.set_N((0, 1)[0x80 == (value & 0x80)])
+        self.pc_state.P.set_Z((0, 1)[0x00 == (value & 0xFF)])
 
     def addc(self, a, b, c):
 
         if 0 == self.pc_state.P.get_D():
-            r  = ctypes.c_short(a + b + c).value
+            r = ctypes.c_short(a + b + c).value
             rc = ctypes.c_byte(a + b + c).value
-            self.pc_state.P.set_N((0,1)[0x80 == (rc & 0x80)])
-            self.pc_state.P.set_Z((0,1)[rc == 0x0])
-            self.pc_state.P.set_V((0,1)[rc != r])   # Overflow
+            self.pc_state.P.set_N((0, 1)[0x80 == (rc & 0x80)])
+            self.pc_state.P.set_Z((0, 1)[rc == 0x0])
+            self.pc_state.P.set_V((0, 1)[rc != r])   # Overflow
 
             r = ((a & 0xFF) + (b & 0xFF) + c) & 0xFFFF
-            self.pc_state.P.set_C((0,1)[0x100 == (r & 0x100)])
+            self.pc_state.P.set_C((0, 1)[0x100 == (r & 0x100)])
             result = (a + b + c)
         elif 1 == self.pc_state.P.get_D():
             # Decimal Addition
             # FIXME need to fix flags
             #
-            r = ctypes.c_short(((a >> 4) & 0xF)* 10+ ((a & 0xF) %10) + ((b>>4) & 0xF)* 10 + ((b & 0xF) %10) + c).value
-            rc = ctypes.c_byte(a + b + c).value # ???? TODO
-            self.pc_state.P.set_N((0,1)[r < 0])
-            self.pc_state.P.set_Z((0,1)[rc == 0x0])
+            r = ctypes.c_short(((a >> 4) & 0xF) * 10 + ((a & 0xF) %
+                               10) + ((b >> 4) & 0xF) * 10 + ((b & 0xF) % 10) + c).value
+            rc = ctypes.c_byte(a + b + c).value  # ???? TODO
+            self.pc_state.P.set_N((0, 1)[r < 0])
+            self.pc_state.P.set_Z((0, 1)[rc == 0x0])
             # self.pc_state.P.V = (rc != r) ? 1:0;   # Overflow
 
-            self.pc_state.P.set_C((0,1)[(r > 99) or (r < 0)])
-            result = ((((int(r/10) % 10) << 4) & 0xf0) + (r%10))
+            self.pc_state.P.set_C((0, 1)[(r > 99) or (r < 0)])
+            result = ((((int(r/10) % 10) << 4) & 0xf0) + (r % 10))
 
         return result & 0xFF
 
     def subc(self, a, b, c):
 
         if 0 == self.pc_state.P.get_D():
-            r  = ctypes.c_short(ctypes.c_byte(a).value - ctypes.c_byte(b).value - ctypes.c_byte(c).value).value
+            r = ctypes.c_short(ctypes.c_byte(
+                a).value - ctypes.c_byte(b).value - ctypes.c_byte(c).value).value
             rs = ctypes.c_byte((a - b - c) & 0xFF).value
-            self.pc_state.P.set_N((0,1)[0x80 == (rs & 0x80)]) # Negative
-            self.pc_state.P.set_Z((0,1)[rs == 0])   # Zero
-            self.pc_state.P.set_V((0,1)[r != rs])   # Overflow
+            self.pc_state.P.set_N((0, 1)[0x80 == (rs & 0x80)])  # Negative
+            self.pc_state.P.set_Z((0, 1)[rs == 0])   # Zero
+            self.pc_state.P.set_V((0, 1)[r != rs])   # Overflow
 
-            r = a - b - c 
-            self.pc_state.P.set_C((1,0)[0x100 == (r & 0x100)]) # Carry (not borrow
+            r = a - b - c
+            self.pc_state.P.set_C(
+                (1, 0)[0x100 == (r & 0x100)])  # Carry (not borrow
             result = a - b - c
         elif 1 == self.pc_state.P.get_D():
             # Decimal subtraction
             # FIXME need to fix flags
 
-            r = ctypes.c_short(((a >> 4) & 0xF)* 10+ ((a & 0xF) %10) - (((b>>4) & 0xF)* 10 + ((b & 0xF) %10)) - c).value
+            r = ctypes.c_short(((a >> 4) & 0xF) * 10 + ((a & 0xF) %
+                               10) - (((b >> 4) & 0xF) * 10 + ((b & 0xF) % 10)) - c).value
 
             # rc = a + b + c
-            self.pc_state.P.set_N((0,1)[r < 0])
-            self.pc_state.P.set_Z((0,1)[r == 0x0])
+            self.pc_state.P.set_N((0, 1)[r < 0])
+            self.pc_state.P.set_Z((0, 1)[r == 0x0])
             #  Need to check/fix conditions for V
             # self.pc_state.P.V = (rc != r) ? 1:0;   # Overflow
             self.pc_state.P.set_V(1)   # Overflow
 
-            self.pc_state.P.set_C((0,1)[(r >= 0) and (r <= 99)])
-            result = (((int(r/10) % 10) << 4) & 0xf0) + (r%10)
+            self.pc_state.P.set_C((0, 1)[(r >= 0) and (r <= 99)])
+            result = (((int(r/10) % 10) << 4) & 0xf0) + (r % 10)
 
         return result & 0xFF
 
     def cmp(self, a, b):
-        r = ctypes.c_short(ctypes.c_byte(a).value - ctypes.c_byte(b).value).value
+        r = ctypes.c_short(ctypes.c_byte(a).value -
+                           ctypes.c_byte(b).value).value
         rs = ctypes.c_byte(a - b).value
-        self.pc_state.P.set_N((0,1)[0x80 == (rs & 0x80)])    # Negative
-        self.pc_state.P.set_Z((0,1)[rs == 0])              # Zero
+        self.pc_state.P.set_N((0, 1)[0x80 == (rs & 0x80)])    # Negative
+        self.pc_state.P.set_Z((0, 1)[rs == 0])              # Zero
         r = (a & 0xFF) - (b & 0xFF)
-        self.pc_state.P.set_C((1,0)[0x100 == (r & 0x100)]) # Carry (not borrow)
+        # Carry (not borrow)
+        self.pc_state.P.set_C((1, 0)[0x100 == (r & 0x100)])
+
 
 class Instruction(object):
 
@@ -379,28 +399,31 @@ class Instruction(object):
         if (a & 0xF00) != (b & 0xF00):
             self.clocks.system_clock += self.pc_state.CYCLES_TO_CLOCK
 
+
 class ReadWriteInstruction(Instruction):
-    def __init__(self, clocks, pc_state, address, read, write, instruction_exec, additional_delay = 0):
-        super(ReadWriteInstruction, self).__init__(clocks, pc_state, instruction_exec)
-        self.pc_state         = pc_state
-        self.address          = address
-        self.read             = read
-        self.write            = write
-        self.additional_delay = additional_delay 
+    def __init__(self, clocks, pc_state, address, read, write, instruction_exec, additional_delay=0):
+        super(ReadWriteInstruction, self).__init__(
+            clocks, pc_state, instruction_exec)
+        self.pc_state = pc_state
+        self.address = address
+        self.read = read
+        self.write = write
+        self.additional_delay = additional_delay
 
     def execute(self):
         a = self.address
         r = self.read
         w = self.write
 
-        addr         = a.address(True)
- 
+        addr = a.address(True)
+
         execute_time = a.get_addressing_time()
-        value        = r.read(addr)
+        value = r.read(addr)
 
         execute_time += r.get_reading_time()
         data = self._exec(value) & 0xFF
-        self.clocks.system_clock   += execute_time + self.additional_delay + w.get_writing_time()
+        self.clocks.system_clock += execute_time + \
+            self.additional_delay + w.get_writing_time()
 
         w.write(addr, data)
 
@@ -408,11 +431,13 @@ class ReadWriteInstruction(Instruction):
 
         self.pc_state.PC += a.get_addressing_size() + 1
 
+
 class BreakInstruction(Instruction):
     """BreakInstruction"""
 
     def __init__(self, clocks, pc_state, memory, instruction_exec):
-        super(BreakInstruction, self).__init__(clocks, pc_state, instruction_exec)
+        super(BreakInstruction, self).__init__(
+            clocks, pc_state, instruction_exec)
         self.memory = memory
 
     def execute(self):
@@ -445,10 +470,13 @@ class BreakInstruction(Instruction):
         self.pc_state.PC = adl + (adh << 8)
         #print ("%s"%(str(self.__doc__)))
 
+
 class JumpSubRoutineInstruction(Instruction):
     """JumpSubRoutineInstruction"""
+
     def __init__(self, clocks, pc_state, memory, instruction_exec):
-        super(JumpSubRoutineInstruction, self).__init__(clocks, pc_state, instruction_exec)
+        super(JumpSubRoutineInstruction, self).__init__(
+            clocks, pc_state, instruction_exec)
         self.memory = memory
 
     def execute(self):
@@ -477,15 +505,17 @@ class JumpSubRoutineInstruction(Instruction):
 
         #print ("%s"%(str(self.__doc__)))
 
+
 class ReturnFromSubRoutineInstruction(Instruction):
     """ReturnFromSubRoutineInstruction"""
-    
+
     def __init__(self, clocks, pc_state, memory, instruction_exec):
-        super(ReturnFromSubRoutineInstruction, self).__init__(clocks, pc_state, instruction_exec)
+        super(ReturnFromSubRoutineInstruction, self).__init__(
+            clocks, pc_state, instruction_exec)
         self.memory = memory
 
     def execute(self):
-        # T1 - PC + 1 
+        # T1 - PC + 1
         self.clocks.system_clock += self.pc_state.CYCLES_TO_CLOCK
         self.pc_state.PC += 1
         # T2 - Stack Ptr
@@ -507,11 +537,13 @@ class ReturnFromSubRoutineInstruction(Instruction):
 
         #print ("%s"%(str(self.__doc__)))
 
+
 class ReturnFromInterrupt(Instruction):
     """ReturnFromInterrupt"""
 
     def __init__(self, clocks, pc_state, memory, instruction_exec):
-        super(ReturnFromInterrupt, self).__init__(clocks, pc_state, instruction_exec)
+        super(ReturnFromInterrupt, self).__init__(
+            clocks, pc_state, instruction_exec)
         self.memory = memory
 
     def execute(self):
@@ -537,11 +569,13 @@ class ReturnFromInterrupt(Instruction):
 
         #print ("%s"%(str(self.__doc__)))
 
+
 class BranchInstruction(Instruction):
     """BranchInstruction"""
 
     def __init__(self, clocks, pc_state, memory, condition_mask, condition, instruction_exec):
-        super(BranchInstruction, self).__init__(clocks, pc_state, instruction_exec)
+        super(BranchInstruction, self).__init__(
+            clocks, pc_state, instruction_exec)
         self.memory = memory
         self.condition_mask = condition_mask
         self.condition = condition
@@ -565,10 +599,13 @@ class BranchInstruction(Instruction):
 
         #print ("%s"%(str(self.__doc__)))
 
+
 class SingleByteInstruction(Instruction):
     """SingleByteInstruction"""
+
     def __init__(self, clocks, pc_state, src, dst, instruction_exec):
-        super(SingleByteInstruction, self).__init__(clocks, pc_state, instruction_exec)
+        super(SingleByteInstruction, self).__init__(
+            clocks, pc_state, instruction_exec)
         self.src = src
         self.dst = dst
 
@@ -579,31 +616,37 @@ class SingleByteInstruction(Instruction):
         self.pc_state.PC += 1
         #print ("%s -> (+??)"%(str(self.instruction_exec.__doc__)))
 
+
 class JumpInstruction(Instruction):
     """JumpInstruction"""
 
     def __init__(self, clocks, pc_state, address, instruction_exec):
-        super(JumpInstruction, self).__init__(clocks, pc_state, instruction_exec)
+        super(JumpInstruction, self).__init__(
+            clocks, pc_state, instruction_exec)
         self.address = address
 
     def execute(self):
         self.clocks.system_clock += 1 * self.pc_state.CYCLES_TO_CLOCK
-        addr    = self.address.address(False)
+        addr = self.address.address(False)
         execute_time = self.address.get_addressing_time()
         self.clocks.system_clock += execute_time
         self.pc_state.PC = addr
         #print ("%s"%(str(self.__doc__)))
 
+
 class PHPInstruction(Instruction):
     """PHPInstruction"""
+
     def __init__(self, clocks, pc_state, memory, instruction_exec):
-        super(PHPInstruction, self).__init__(clocks, pc_state, instruction_exec)
+        super(PHPInstruction, self).__init__(
+            clocks, pc_state, instruction_exec)
         self.memory = memory
+
     def execute(self):
-        # T1 - PC + 1 
+        # T1 - PC + 1
         self.clocks.system_clock += self.pc_state.CYCLES_TO_CLOCK
         self.pc_state.PC += 1
-        # T2 - PC + 1 
+        # T2 - PC + 1
         self.clocks.system_clock += self.pc_state.CYCLES_TO_CLOCK
         self.pc_state.P.set_B(1)
         self.pc_state.P.set_X1(1)
@@ -614,13 +657,17 @@ class PHPInstruction(Instruction):
 
         #print ("%s"%(str(self.__doc__)))
 
+
 class PLPInstruction(Instruction):
     """PLPInstruction"""
+
     def __init__(self, clocks, pc_state, memory, instruction_exec):
-        super(PLPInstruction, self).__init__(clocks, pc_state, instruction_exec)
+        super(PLPInstruction, self).__init__(
+            clocks, pc_state, instruction_exec)
         self.memory = memory
+
     def execute(self):
-        # T1 - PC + 1 
+        # T1 - PC + 1
         self.clocks.system_clock += self.pc_state.CYCLES_TO_CLOCK
         self.pc_state.PC += 1
         # T2 Stack Ptr. (Discard data)
@@ -634,32 +681,39 @@ class PLPInstruction(Instruction):
         self.clocks.system_clock += self.pc_state.CYCLES_TO_CLOCK
         #print ("%s"%(str(self.__doc__)))
 
+
 class PHAInstruction(Instruction):
     """PHAInstruction"""
+
     def __init__(self, clocks, pc_state, memory, instruction_exec):
-        super(PHAInstruction, self).__init__(clocks, pc_state, instruction_exec)
+        super(PHAInstruction, self).__init__(
+            clocks, pc_state, instruction_exec)
         self.memory = memory
 
     def execute(self):
-        # T1 - PC + 1 
+        # T1 - PC + 1
         self.clocks.system_clock += self.pc_state.CYCLES_TO_CLOCK
         self.pc_state.PC += 1
-        # T2 - PC + 1 
+        # T2 - PC + 1
         self.clocks.system_clock += self.pc_state.CYCLES_TO_CLOCK
-        self.memory.writeSp(self.pc_state.S.get_value(), self.pc_state.A.get_value())
+        self.memory.writeSp(self.pc_state.S.get_value(),
+                            self.pc_state.A.get_value())
         self.pc_state.S -= 1
         # T0 - Next kid
         self.clocks.system_clock += self.pc_state.CYCLES_TO_CLOCK
         #print ("%s"%(str(self.__doc__)))
 
+
 class PLAInstruction(Instruction):
     """PLAInstruction"""
+
     def __init__(self, clocks, pc_state, memory, instruction_exec):
-        super(PLAInstruction, self).__init__(clocks, pc_state, instruction_exec)
+        super(PLAInstruction, self).__init__(
+            clocks, pc_state, instruction_exec)
         self.memory = memory
 
     def execute(self):
-        # T1 - PC + 1 
+        # T1 - PC + 1
         self.clocks.system_clock += self.pc_state.CYCLES_TO_CLOCK
         self.pc_state.PC += 1
         # T2 Stack Ptr. (Discard data)
@@ -668,12 +722,13 @@ class PLAInstruction(Instruction):
         # T3 Stack Ptr + 1.
         self.clocks.system_clock += self.pc_state.CYCLES_TO_CLOCK
         self.pc_state.S += 1
-        self.pc_state.A.set_value(self.memory.readSp(self.pc_state.S.get_value()))
+        self.pc_state.A.set_value(
+            self.memory.readSp(self.pc_state.S.get_value()))
         self.set_status_NZ(self.pc_state.A.get_value())
         # T0 - Next instruction
         self.clocks.system_clock += self.pc_state.CYCLES_TO_CLOCK
         #print ("%s"%(str(self.__doc__)))
 
     def set_status_NZ(self, value):
-        self.pc_state.P.set_N((0,1)[0x80 == (value & 0x80)])
-        self.pc_state.P.set_Z((0,1)[0x00 == (value & 0xFF)])
+        self.pc_state.P.set_N((0, 1)[0x80 == (value & 0x80)])
+        self.pc_state.P.set_Z((0, 1)[0x00 == (value & 0xFF)])
