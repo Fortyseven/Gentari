@@ -1,3 +1,9 @@
-hg+http://bitbucket.org/pygame/pygame; platform_python_implementation != 'PyPy'
-pygame_cffi; platform_python_implementation == 'PyPy'
-coveralls
+pygame==2.1.2
+coveralls==3.3.1
+certifi==2021.10.8
+coverage==6.2
+charset-normalizer==2.0.9
+docopt==0.6.2
+idna==3.3
+requests==2.26.0
+urllib3==1.26.7
