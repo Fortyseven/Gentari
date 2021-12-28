@@ -985,7 +985,8 @@ class Stella(object):
 
     def _update_scans(self):
         if self._is_update_time:
-            tmp = time.clock()
+            # tmp = time.clock()
+            tmp = time.process_time()
             print(tmp - self._debug_display_time)
             self._debug_display_time = tmp
 

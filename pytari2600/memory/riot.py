@@ -63,7 +63,7 @@ class Riot(object):
                 value = (self.expiration_time - future_clock) / (self.interval * self.CYCLES_TO_CLOCK)
             else: # Calculate ticks past zero, may not be quite right
                 # The interval was passed, value counts down from 255.
-                value = 0x100 - (((future_clock - self.expiration_time)/self.CYCLES_TO_CLOCK) & 0xFF)
+                value = 0x100 - (((future_clock - self.expiration_time)//self.CYCLES_TO_CLOCK) & 0xFF)
         elif test == self.RIOT_Interrupt:
             if self.expiration_time >= future_clock:
                 value = 0
